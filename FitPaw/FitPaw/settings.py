@@ -19,6 +19,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure--je83^o5n8ofop05iyk1g9vkm3i2kurmd3el&)-be8+3f4e6_7'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -31,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'api',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -68,7 +77,14 @@ WSGI_APPLICATION = 'FitPaw.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-
+  'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'FitPawDB',
+        'USER': 'postgres',
+        'PASSWORD': 'oleksii29.forever',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
 
@@ -90,6 +106,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',  # tylko JSON
+    ],
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
