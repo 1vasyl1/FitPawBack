@@ -3,15 +3,23 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class UserSerializer(serializers.ModelSerializer):
+class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ["id", "username","password", "first_name", "last_name", "email", "img", "date_joined", "is_staff"]
-        read_only_fields = ["id", "date_joined", "is_staff"]
+        model  = User
+        fields = ["id", "username", "first_name", "last_name", "email", "date_joined"]
+        read_only_fields = fields
+
+
+class UserSignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+    class Meta:
+        model  = User
+        fields = ["username", "password", "first_name", "last_name", "email"]
 
     def create(self, validated_data):
-        password = validated_data.pop("password", None)
+        password = validated_data.pop("password")
         user = super().create(validated_data)
         user.set_password(password)
         user.save()
         return user
+
