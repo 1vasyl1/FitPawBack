@@ -80,7 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == "create":
             return [AllowAny()]
-        if self.request.method in ("PUT", "PATCH", "DELETE"):
+        if self.request.method in ( "PUT", "PATCH", "DELETE"):
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
