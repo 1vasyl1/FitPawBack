@@ -1,5 +1,9 @@
+from http.client import responses
+
 from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -11,9 +15,6 @@ from .serializers import (UserReadSerializer, UserSignupSerializer)
 User = get_user_model()
 
 class SignupView(CreateAPIView):
-    """
-    POST /auth/signup
-    """
     serializer_class = UserSignupSerializer
     permission_classes = [AllowAny]
 
@@ -57,17 +58,21 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 @permission_classes([AllowAny])
 class MyTokenObtainPairView(TokenObtainPairView):
-    """
-    POST /auth/login
-    Returns:
-    {
-        "refresh": "...",
-        "access": "...",
-        "user": { ...serialized user... }
-     }
-    """
     serializer_class = MyTokenObtainPairSerializer
-
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        access_token = str(response.data["access"])
+        expiry = timezone.now() + timedelta(minutes=15)
+    # ACCES_TOKEN_LIFETIME
+        response.set_cookie(
+            key="access",
+            value=access_token,
+            expires=expiry,
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+        )
+        return response
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by("username")
     serializer_class = UserReadSerializer
