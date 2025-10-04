@@ -6,5 +6,8 @@ version: "1.0"
 linter: jetbrains/qodana-python:2025.2
 profile:
   name: qodana.recommended
-include:
-  - name: CheckDependencyLicenses
+inspections:
+  include:
+    - name: CheckDependencyLicenses
+
+fixesStrategy: apply
