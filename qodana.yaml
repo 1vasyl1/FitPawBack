@@ -9,5 +9,4 @@ profile:
 inspections:
   include:
     - name: CheckDependencyLicenses
-
 fixesStrategy: apply
