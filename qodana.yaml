@@ -5,7 +5,9 @@
 version: "1.0"
 profile:
   name: qodana.recommended
-settings:
-  inspections:
-    include:
-      - CheckDependencyLicenses
+
+linter: qodana-python
+
+inspections:
+  include:
+    - CheckDependencyLicenses
