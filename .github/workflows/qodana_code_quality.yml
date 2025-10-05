@@ -22,9 +22,7 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.2
         with:
-          image: jetbrains/qodana-python:2025.2
-          comand: scan
-          args: --apply-fixes
+          args: qodana scan --image jetbrains/qodana-python:2025.2 --apply-fixes
           pr-mode: false
           push-fixes: pull-request
         env:
