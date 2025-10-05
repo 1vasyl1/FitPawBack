@@ -5,11 +5,13 @@ from schedule.models import Trainer, Lessons
 
 class StaffAdminSite(UnfoldAdminSite):
 
+    def __init__(self):
+        self.index_title = _("Witaj na panelu Staff")
+
     def each_context(self, request):
         context = super().each_context(request)
         context['site_header'] = _("Staff Dashboard")
         context['site_title'] = _("Staff Portal")
-        self.index_title = _("Witaj na panelu Staff")
         return context
 
     def has_permission(self, request):
