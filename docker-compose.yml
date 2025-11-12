@@ -1,0 +1,28 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      POSTGRES_DB: FitPawDB
+      POSTGRES_USER: login
+      POSTGRES_PASSWORD: Password
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:14.17
+    restart: always
+    environment:
+      POSTGRES_DB: FitPawDB
+      POSTGRES_USER: login
+      POSTGRES_PASSWORD: Password
+    ports:
+      - "5432:5432"
+    volumes:
+        - pg:/var/lib/postgresql/data
+
+volumes:
+  pg:
