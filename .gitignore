@@ -8,6 +8,7 @@ __pycache__/
 .venv/
 env/
 venv/
+.env
 
 .idea/
 
@@ -17,3 +18,5 @@ venv/
 !**/migrations/__init__.py
 
 FitPaw/FitPaw/settings.py
+
+docker-compose.yml
