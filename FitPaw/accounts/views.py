@@ -89,6 +89,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
+    # investigate how permission really work
     @action(detail=False, methods=["GET", "PATCH"])
     def me(self, request):
         user = request.user
