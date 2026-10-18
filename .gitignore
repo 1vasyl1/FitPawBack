@@ -16,6 +16,10 @@ venv/
 
 **/migrations/*.py
 !**/migrations/__init__.py
+!FitPaw/payments/migrations/
+!FitPaw/payments/migrations/*.py
+!FitPaw/membership/migrations/
+!FitPaw/membership/migrations/*.py
 
 FitPaw/FitPaw/settings.py
 

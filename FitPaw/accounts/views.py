@@ -10,7 +10,11 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.generics import CreateAPIView
-from .serializers import (UserReadSerializer, UserSignupSerializer)
+from .serializers import (
+    UserProfileSerializer,
+    UserReadSerializer,
+    UserSignupSerializer,
+)
 
 User = get_user_model()
 
@@ -80,23 +84,26 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return UserSignupSerializer
+        if self.action == "me":
+            return UserProfileSerializer
         return UserReadSerializer
 
     def get_permissions(self):
         if self.action == "create":
             return [AllowAny()]
+        if self.action == "me":
+            return [IsAuthenticated()]
         if self.request.method in ( "PUT", "PATCH", "DELETE"):
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
-    # investigate how permission really work
     @action(detail=False, methods=["GET", "PATCH"])
     def me(self, request):
         user = request.user
-        if request.method == "GET":
-            serializer = UserReadSerializer(user)
-        else:
-            serializer = UserReadSerializer(user, data=request.data, partial=True)
+        if request.method == "PATCH":
+            serializer = self.get_serializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+        else:
+            serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)

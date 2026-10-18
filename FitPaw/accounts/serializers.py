@@ -10,6 +10,11 @@ class UserReadSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class UserProfileSerializer(UserReadSerializer):
+    class Meta(UserReadSerializer.Meta):
+        read_only_fields = ["id", "username", "img", "date_joined"]
+
+
 class UserSignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     class Meta:
@@ -24,4 +29,3 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-

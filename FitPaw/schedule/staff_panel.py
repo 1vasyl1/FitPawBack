@@ -2,6 +2,10 @@ from django.utils.translation import gettext_lazy as _
 from unfold.sites import UnfoldAdminSite
 from schedule.admin import TrainerAdmin, LessonAdmin
 from schedule.models import Trainer, Lessons
+from membership.admin import MembershipAdmin
+from membership.models import Membership
+from payments.admin import StripeWebhookEventAdmin
+from payments.models import StripeWebhookEvent
 
 class StaffAdminSite(UnfoldAdminSite):
 
@@ -19,3 +23,5 @@ class StaffAdminSite(UnfoldAdminSite):
 staff_admin = StaffAdminSite(name="staff_admin")
 staff_admin.register(Trainer, TrainerAdmin)
 staff_admin.register(Lessons, LessonAdmin)
+staff_admin.register(Membership, MembershipAdmin)
+staff_admin.register(StripeWebhookEvent, StripeWebhookEventAdmin)
