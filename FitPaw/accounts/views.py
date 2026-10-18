@@ -7,7 +7,7 @@ from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.generics import CreateAPIView
 from .serializers import (
@@ -63,11 +63,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 @permission_classes([AllowAny])
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         access_token = str(response.data["access"])
+        refresh_token = str(response.data["refresh"])
         expiry = timezone.now() + timedelta(minutes=15)
-    # ACCES_TOKEN_LIFETIME
+        refresh_expiry = timezone.now() + timedelta(days=7)
+        # ACCES_TOKEN_LIFETIME
         response.set_cookie(
             key="access",
             value=access_token,
@@ -76,7 +79,33 @@ class MyTokenObtainPairView(TokenObtainPairView):
             secure=True,
             samesite="Lax",
         )
+
+        # REFRESH_TOKEN_LIFETIME
+        response.set_cookie(
+            key="refresh",
+            value=refresh_token,
+            expires=refresh_expiry,
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+        )
         return response
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refresh")
+
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token not found."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        request.data["refresh"] = refresh_token
+        return super().post(request, *args, **kwargs)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by("username")
     serializer_class = UserReadSerializer

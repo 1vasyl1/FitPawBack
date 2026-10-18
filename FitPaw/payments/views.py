@@ -17,7 +17,6 @@ from .services import (
     list_membership_plans,
     process_stripe_webhook_event,
     retrieve_checkout_session,
-    sync_membership_from_checkout_session,
 )
 
 
@@ -110,7 +109,6 @@ def get_session_status(request):
     if str(owner_id) != str(request.user.id):
         return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
 
-    sync_membership_from_checkout_session(checkout_session)
     membership = Membership.objects.filter(user=request.user).first()
     subscription_id = getattr(checkout_session, "subscription", None)
     if not isinstance(subscription_id, str):

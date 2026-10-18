@@ -87,3 +87,40 @@ class UserProfileApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "member@example.com")
+
+
+class AuthRefreshCookieTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.username = "member"
+        self.password = "password123"
+        user_model.objects.create_user(
+            username=self.username,
+            email="member@example.com",
+            password=self.password,
+        )
+        self.client = APIClient()
+
+    def test_refresh_uses_cookie_without_refresh_in_body(self):
+        login_response = self.client.post(
+            "/auth/login/",
+            {
+                "username": self.username,
+                "password": self.password,
+            },
+            format="json",
+        )
+        self.assertEqual(login_response.status_code, 200)
+        self.assertIn("refresh", login_response.cookies)
+
+        refresh_response = self.client.post("/auth/token/refresh/", {}, format="json")
+
+        self.assertEqual(refresh_response.status_code, 200)
+        self.assertIn("access", refresh_response.data)
+
+    def test_refresh_without_cookie_returns_401(self):
+        client = APIClient()
+
+        response = client.post("/auth/token/refresh/", {}, format="json")
+
+        self.assertEqual(response.status_code, 401)
