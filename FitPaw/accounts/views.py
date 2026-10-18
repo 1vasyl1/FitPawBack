@@ -1,5 +1,3 @@
-from http.client import responses
-
 from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
 from datetime import timedelta
@@ -122,7 +120,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         if self.action == "me":
             return [IsAuthenticated()]
-        if self.request.method in ("DELETE"):
+        if self.request.method in ( "PUT", "PATCH", "DELETE"):
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
