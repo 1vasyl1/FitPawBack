@@ -122,7 +122,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         if self.action == "me":
             return [IsAuthenticated()]
-        if self.request.method in ( "PUT", "PATCH", "DELETE"):
+        if self.request.method in ("DELETE"):
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
