@@ -67,15 +67,29 @@ Do testowania endpointow wymagajacych autoryzacji dodaj naglowek `Authorization:
 | GET | `/auth/users/` | Lista uzytkownikow | Tak (admin) |
 | GET | `/auth/users/{id}/` | Szczegoly uzytkownika | Tak |
 | POST | `/auth/users/` | Dodanie uzytkownika | Nie |
-| GET | `/auth/users/me/` | Zalogowany uzytkownik | Tak |
-| PATCH | `/auth/users/me/` | Aktualizacja profilu zalogowanego uzytkownika | Tak |
+| GET | `/auth/users/me/` | Zalogowany uzytkownik (biezace konto z `request.user`) | Tak |
+| PATCH | `/auth/users/me/` | Aktualizacja profilu zalogowanego uzytkownika (tylko pola profilu) | Tak |
 | GET/POST | `/schedule/trainers/` | Lista i tworzenie trenerow | GET: Nie, POST: Tak |
 | GET/PATCH/DELETE | `/schedule/trainers/{id}/` | Operacje na trenerze | Tak |
 | GET/POST | `/schedule/lessons/` | Lista i tworzenie zajec | GET: Nie, POST: Tak |
 | GET/PATCH/DELETE | `/schedule/lessons/{id}/` | Operacje na zajeciach | Tak |
+| GET | `/api/payments/plans/` | Aktywne plany subskrypcji Stripe | Nie |
+| POST | `/api/payments/create-checkout-session/` | Utworzenie embedded Checkout Session | Tak |
+| GET | `/api/payments/session-status/?session_id=...` | Status sesji i Membership | Tak |
+| POST | `/api/payments/webhook/` | Synchronizacja Membership ze Stripe | Stripe signature |
+| GET | `/api/membership/me/` | Membership zalogowanego uzytkownika | Tak |
 | GET | `/admin/` | Panel administracyjny Django | Tak (konto staff) |
 
 > Uwaga: router REST Framework domyslnie dodaje znak `/` na koncu sciezek. Jezeli zmieniasz `APPEND_SLASH` w ustawieniach, dostosuj powyzsze adresy.
+
+### Profil zalogowanego uzytkownika (`/auth/users/me/`)
+- Endpoint jest przeznaczony **wylacznie** dla zalogowanego uzytkownika (`IsAuthenticated`).
+- Zarowno `GET`, jak i `PATCH` dzialaja na obiekcie `request.user` (brak mozliwosci edycji innego konta).
+- `PATCH` pozwala aktualizowac tylko:
+  - `email`
+  - `first_name`
+  - `last_name`
+- Pola tozsamosci/uprawnien pozostaja tylko do odczytu (np. `id`, `username`, `is_staff`, `is_superuser`).
 
 ## Testy
 Aby uruchomic testy jednostkowe i integracyjne projektu:
@@ -88,6 +102,10 @@ python manage.py test
 - Pola `ImageField` wymagaja skonfigurowania `MEDIA_ROOT` oraz `MEDIA_URL` (obecnie nie ma ich w ustawieniach); podczas pracy lokalnej mozesz dodac je w `settings.py`.
 - Zmien klucz `SECRET_KEY` oraz dane bazy przed wdrozeniem na produkcje. Rozwaz uzycie zmiennych srodowiskowych lub menedzera sekretow.
 - `CORS_ALLOWED_ORIGINS` jest ustawione na `http://localhost:3000`. Dodaj kolejne domeny frontendu wedlug potrzeb.
+- Integracja Stripe wymaga `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID_ENTER`, `STRIPE_PRICE_ID_PRO`,
+  `STRIPE_PRICE_ID_ELITE`, `STRIPE_WEBHOOK_SECRET` oraz `STRIPE_RETURN_URL`.
+- Frontend nie powinien otrzymywac `STRIPE_SECRET_KEY`; do embedded Checkout uzywa
+  `clientSecret` zwroconego przez `/api/payments/create-checkout-session/`.
 
 ## Dalszy rozwoj
 - Dodanie walidacji kolizji terminow w modelu zajec

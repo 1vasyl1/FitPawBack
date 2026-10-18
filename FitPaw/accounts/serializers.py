@@ -10,6 +10,11 @@ class UserReadSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class UserProfileSerializer(UserReadSerializer):
+    class Meta(UserReadSerializer.Meta):
+        read_only_fields = ["id", "username", "img", "date_joined"]
+
+
 class UserSignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     class Meta:
@@ -24,16 +29,3 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-
-
-class UserUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["first_name", "last_name", "email"]
-
-    def update(self, instance, validated_data):
-        instance.first_name = validated_data.get("first_name", instance.first_name)
-        instance.last_name = validated_data.get("last_name", instance.last_name)
-        instance.email = validated_data.get("email", instance.email)
-        instance.save()
-        return instance

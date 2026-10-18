@@ -1,5 +1,3 @@
-from http.client import responses
-
 from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
 from datetime import timedelta
@@ -10,10 +8,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.generics import CreateAPIView
-from .serializers import (UserReadSerializer, UserSignupSerializer, UserUpdateSerializer)
+from .serializers import (
+    UserProfileSerializer,
+    UserReadSerializer,
+    UserSignupSerializer,
+)
 
 User = get_user_model()
-
 
 class SignupView(CreateAPIView):
     serializer_class = UserSignupSerializer
@@ -57,7 +58,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["user"] = UserReadSerializer(self.user).data
         return data
 
-
 @permission_classes([AllowAny])
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -89,6 +89,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
         )
         return response
 
+
 class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get("refresh")
@@ -96,11 +97,12 @@ class CookieTokenRefreshView(TokenRefreshView):
         if not refresh_token:
             return Response(
                 {"detail": "Refresh token not found."},
-                status=status.HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         request.data["refresh"] = refresh_token
         return super().post(request, *args, **kwargs)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by("username")
@@ -109,23 +111,26 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return UserSignupSerializer
+        if self.action == "me":
+            return UserProfileSerializer
         return UserReadSerializer
 
     def get_permissions(self):
         if self.action == "create":
             return [AllowAny()]
-        if self.request.method in ("DELETE"):
+        if self.action == "me":
+            return [IsAuthenticated()]
+        if self.request.method in ( "PUT", "PATCH", "DELETE"):
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
     @action(detail=False, methods=["GET", "PATCH"])
     def me(self, request):
         user = request.user
-        if request.method == "GET":
-            serializer = UserReadSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        if request.method == "PATCH":
+            serializer = self.get_serializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(UserReadSerializer(user).data, status=status.HTTP_200_OK)
+        else:
+            serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
